@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CarWar</title>
+        <link rel="stylesheet" href="./css/style.css">
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Oswald:wght@400;700&display=swap">
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+          <div class="logo">Car<span>War</span></div>
+          <div class="game-info">
+              <div class="info-box">
+                  <div class="info-label">SCORE</div>
+                  <div class="info-value score">0</div>
+              </div>
+              <div class="info-box">
+                  <div class="info-label">SPEED</div>
+                  <div class="info-value speed">1x</div>
+              </div>
+              <div class="info-box">
+                  <div class="info-label">COMBO</div>
+                  <div class="info-value combo">1x</div>
+              </div>
+          </div>
+      </header>
+
+      <!-- Game Area -->
+      <div class="game-area-container">
+          <div class="game-area">
+              <div class="road"></div>
+              <!-- Game elements will be added here dynamically -->
+          </div>
+          
+          <!-- Combo Meter -->
+          <div class="combo-meter">
+              <div class="combo-count">2x</div>
+              <div class="combo-text">COMBO!</div>
+          </div>
+          
+          <!-- Pause Menu -->
+          <div class="pause-menu">
+              <h2>GAME PAUSED</h2>
+              <div class="pause-menu-buttons">
+                  <button class="btn btn-primary resume-btn">RESUME</button>
+                  <button class="btn quit-btn">QUIT</button>
+              </div>
+          </div>
+          
+          <!-- Game Over Modal -->
+          <div class="game-over-modal">
+              <h2>GAME OVER</h2>
+              <p>Your score:</p>
+              <div class="result-score">0</div>
+              <p>High score: <span class="high-score">0</span></p>
+              <div class="game-over-buttons">
+                  <button class="btn btn-primary btn-lg play-again-btn">PLAY AGAIN</button>
+                  <button class="btn btn-lg main-menu-btn">MAIN MENU</button>
+              </div>
+          </div>
+      </div>
+
+      <!-- Main Menu -->
+      <div class="menu main-menu">
+          <h1 class="menu-title">Car<span>War</span></h1>
+          <div class="menu-section">
+              <div class="game-mode-selector">
+                  <div class="mode-option active" data-mode="classic">
+                      <div class="mode-icon">🏁</div>
+                      <div class="mode-info">
+                          <h3>Classic Mode</h3>
+                          <p>Avoid traffic and score as many points as you can</p>
+                      </div>
+                  </div>
+                  <div class="mode-option" data-mode="time">
+                      <div class="mode-icon">⏱️</div>
+                      <div class="mode-info">
+                          <h3>Time Trial</h3>
+                          <p>Race against the clock to reach checkpoints</p>
+                      </div>
+                  </div>
+                  <div class="mode-option" data-mode="survival">
+                      <div class="mode-icon">💀</div>
+                      <div class="mode-info">
+                          <h3>Survival</h3>
+                          <p>See how long you can last with increasing difficulty</p>
+                      </div>
+                  </div>
+              </div>
+              
+              <div class="car-customization">
+                  <h3>SELECT YOUR CAR</h3>
+                  <div class="car-preview">
+                      <!-- Car preview will be shown here -->
+                  </div>
+                  <div class="car-options">
+                      <div class="car-option selected" data-car="1" style="background-color: #FF5722;"></div>
+                      <div class="car-option" data-car="2" style="background-color: #2196F3;"></div>
+                      <div class="car-option" data-car="3" style="background-color: #4CAF50;"></div>
+                      <div class="car-option" data-car="4" style="background-color: #9C27B0;"></div>
+                  </div>
+              </div>
+              
+              <div class="menu-buttons">
+                  <button class="btn btn-primary btn-lg start-game-btn">START GAME</button>
+                  <button class="btn customize-btn">CUSTOMIZE CAR</button>
+                  <button class="btn controls-btn">HOW TO PLAY</button>
+                  <button class="btn credits-btn">CREDITS</button>
+              </div>
+              
+              <div class="controls-info">
+                  <h3>CONTROLS</h3>
+                  <div class="controls-grid">
+                      <div class="control-item">
+                          <div class="control-key">←</div>
+                          <div>Move Left</div>
+                      </div>
+                      <div class="control-item">
+                          <div class="control-key">→</div>
+                          <div>Move Right</div>
+                      </div>
+                      <div class="control-item">
+                          <div class="control-key">↑</div>
+                          <div>Move Up</div>
+                      </div>
+                      <div class="control-item">
+                          <div class="control-key">↓</div>
+                          <div>Move Down</div>
+                      </div>
+                      <div class="control-item">
+                          <div class="control-key">P</div>
+                          <div>Pause Game</div>
+                      </div>
+                      <div class="control-item">
+                          <div class="control-key">ESC</div>
+                          <div>Menu/Back</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Mobile Message -->
+  <div class="mobile-message">
+      <h2>Please play on a larger screen with keyboard controls for the best experience!</h2>
+  </div>
+
+  <script>
+      // Game Constants
+      const CAR_WIDTH = 50;
+      const CAR_HEIGHT = 100;
+      const POWERUP_SIZE = 40;
+      const ROAD_WIDTH = 300;
+      const MAX_ENEMIES = 7;
+      const POWERUP_TYPES = ['speed', 'shield', 'multiplier'];
+      const POWERUP_COLORS = {
+          speed: 'gold',
+          shield: 'silver',
+          multiplier: 'violet'
+      };
+      const CAR_COLORS = ['#FF5722', '#2196F3', '#4CAF50', '#9C27B0'];
+      
+      // Game Variables
+      let gameArea, road, car;
+      let gameActive = false;
+      let gamePaused = false;
+      let keys = {
+          ArrowUp: false,
+          ArrowDown: false,
+          ArrowLeft: false,
+          ArrowRight: false,
+          w: false,
+          a: false,
+          s: false,
+          d: false,
+          p: false,
+          Escape: false,
+      };
+      
+      // Game State
+      let state = {
+          score: 0,
+          speed: 3,
+          baseSpeed: 3,
+          traffic: 3,
+          gameMode: 'classic',
+          carType: 1,
+          combo: 1,
+          comboTimeout: null,
+          comboActive: false,
+          powerups: {
+              speed: { active: false, timeout: null, multiplier: 2 },
+              shield: { active: false, timeout: null },
+              multiplier: { active: false, timeout: null, multiplier: 2 }
+          },
+          enemies: [],
+          powerupsList: [],
+          particles: [],
+          highScore: localStorage.getItem('needForJSHighScore') || 0,
+          timeTrial: {
+              time: 0,
+              checkpoint: 0,
+              checkpointTime: 30000 // 30 seconds per checkpoint
+          },
+          survival: {
+              level: 1,
+              nextLevelScore: 1000
+          }
+      };
+      
+      // DOM Elements
+      const scoreElement = document.querySelector('.info-value.score');
+      const speedElement = document.querySelector('.info-value.speed');
+      const comboElement = document.querySelector('.info-value.combo');
+      const comboMeter = document.querySelector('.combo-meter');
+      const comboCount = document.querySelector('.combo-count');
+      const gameOverModal = document.querySelector('.game-over-modal');
+      const resultScore = document.querySelector('.result-score');
+      const highScoreElement = document.querySelector('.high-score');
+      const pauseMenu = document.querySelector('.pause-menu');
+      const mainMenu = document.querySelector('.main-menu');
+      const startGameBtn = document.querySelector('.start-game-btn');
+      const playAgainBtn = document.querySelector('.play-again-btn');
+      const mainMenuBtn = document.querySelector('.main-menu-btn');
+      const resumeBtn = document.querySelector('.resume-btn');
+      const quitBtn = document.querySelector('.quit-btn');
+      const modeOptions = document.querySelectorAll('.mode-option');
+      const customizeBtn = document.querySelector('.customize-btn');
+      const carCustomization = document.querySelector('.car-customization');
+      const carOptions = document.querySelectorAll('.car-option');
+      const carPreview = document.querySelector('.car-preview');
+      
+      function init() {
+          gameArea = document.querySelector('.game-area');
+          road = document.querySelector('.road');
+      
+          car = document.createElement('div');
+          car.className = 'car';
+          updateCarAppearance();
+      
+          document.addEventListener('keydown', keyDown);
+          document.addEventListener('keyup', keyUp);
+      
+          startGameBtn.addEventListener('click', startGame);
+          playAgainBtn.addEventListener('click', startGame);
+          mainMenuBtn.addEventListener('click', showMainMenu);
+          resumeBtn.addEventListener('click', resumeGame);
+          quitBtn.addEventListener('click', showMainMenu);
+      
+          modeOptions.forEach(option => {
+              option.addEventListener('click', () => {
+                  modeOptions.forEach(opt => opt.classList.remove('active'));
+                  option.classList.add('active');
+                  state.gameMode = option.dataset.mode;
+              });
+          });
+      
+          customizeBtn.addEventListener('click', () => {
+              carCustomization.style.display = carCustomization.style.display === 'block' ? 'none' : 'block';
+          });
+      
+          carOptions.forEach(option => {
+              option.addEventListener('click', () => {
+                  carOptions.forEach(opt => opt.classList.remove('selected'));
+                  option.classList.add('selected');
+                  state.carType = parseInt(option.dataset.car);
+                  updateCarAppearance();
+              });
+          });
+      
+          showMainMenu();
+      }
+      
+      function updateCarAppearance() {
+          const color = CAR_COLORS[state.carType - 1];
+          car.style.backgroundImage = `
+              url('data:image/svg+xml;utf8,
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+                  <rect x="5" y="20" width="40" height="60" rx="5" fill="${color}"/>
+                  <rect x="10" y="25" width="30" height="50" rx="3" fill="${lightenColor(color, 20)}"/>
+                  <circle cx="15" cy="85" r="10" fill="%23333"/>
+                  <circle cx="35" cy="85" r="10" fill="%23333"/>
+                  ${state.carType === 2 ? '<rect x="20" y="10" width="10" height="10" fill="%23FFEB3B"/>' : ''}
+                  ${state.carType === 3 ? '<rect x="15" y="5" width="20" height="15" rx="2" fill="%23FFFFFF"/>' : ''}
+                  ${state.carType === 4 ? '<rect x="10" y="10" width="30" height="10" fill="%23FFEB3B"/>' : ''}
+              </svg>'
+          `;
+      
+          carPreview.innerHTML = '';
+          const previewCar = document.createElement('div');
+          previewCar.style.width = '100px';
+          previewCar.style.height = '200px';
+          previewCar.style.backgroundImage = car.style.backgroundImage;
+          previewCar.style.backgroundSize = 'contain';
+          previewCar.style.backgroundRepeat = 'no-repeat';
+          previewCar.style.backgroundPosition = 'center';
+          carPreview.appendChild(previewCar);
+      }
+      
+      function lightenColor(color, percent) {
+          const num = parseInt(color.replace('#', ''), 16);
+          const amt = Math.round(2.55 * percent);
+          const R = (num >> 16) + amt;
+          const G = (num >> 8 & 0x00FF) + amt;
+          const B = (num & 0x0000FF) + amt;
+      
+          return '#' + (
+              0x1000000 +
+              (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+              (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+              (B < 255 ? (B < 1 ? 0 : B) : 255)
+          ).toString(16).slice(1);
+      }
+      
+      function showMainMenu() {
+          gameActive = false;
+          mainMenu.style.display = 'flex';
+          gameOverModal.style.display = 'none';
+          pauseMenu.style.display = 'none';
+          clearGameArea();
+      }
+      
+      function clearGameArea() {
+          const children = Array.from(gameArea.children);
+          children.forEach(child => {
+              if (!child.classList.contains('road') &&
+                  !child.classList.contains('combo-meter') &&
+                  !child.classList.contains('pause-menu') &&
+                  !child.classList.contains('game-over-modal')) {
+                  gameArea.removeChild(child);
+              }
+          });
+      }
+      
+      function createRoadLines() {
+          const lineHeight = 50;
+          const lineSpacing = 100;
+          const lineCount = Math.ceil(gameArea.offsetHeight / lineSpacing) + 1;
+      
+          for (let i = 0; i < lineCount; i++) {
+              const line = document.createElement('div');
+              line.className = 'line';
+              line.style.width = '10px';
+              line.style.height = lineHeight + 'px';
+              line.style.left = (ROAD_WIDTH / 2 - 5) + 'px';
+              line.style.top = (i * lineSpacing) + 'px';
+              line.y = i * lineSpacing;
+              gameArea.appendChild(line);
+          }
+      }
+      
+      function createInitialEnemies() {
+          const enemySpacing = CAR_HEIGHT * state.traffic;
+          const enemyCount = Math.ceil(gameArea.offsetHeight / enemySpacing) + 1;
+      
+          for (let i = 0; i < enemyCount; i++) {
+              createEnemy(-enemySpacing * (i + 1));
+          }
+      }
+      
+      function createEnemy(yPos) {
+          const enemy = document.createElement('div');
+          enemy.className = 'enemy';
+          enemy.style.width = CAR_WIDTH + 'px';
+          enemy.style.height = CAR_HEIGHT + 'px';
+          enemy.style.left = Math.random() * (ROAD_WIDTH - CAR_WIDTH) + 'px';
+          enemy.style.top = yPos + 'px';
+          enemy.x = parseInt(enemy.style.left);
+          enemy.y = yPos;
+      
+          gameArea.appendChild(enemy);
+          state.enemies.push(enemy);
+      }
+      
+      function createPowerup() {
+          // Random chance to spawn power-up (5%)
+          if (Math.random() > 0.95) {
+              const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+              const powerup = document.createElement('div');
+              powerup.className = `powerup ${type}`;
+              powerup.style.width = POWERUP_SIZE + 'px';
+              powerup.style.height = POWERUP_SIZE + 'px';
+              powerup.style.left = Math.random() * (ROAD_WIDTH - POWERUP_SIZE) + 'px';
+              powerup.style.top = -POWERUP_SIZE + 'px';
+              powerup.x = parseInt(powerup.style.left);
+              powerup.y = -POWERUP_SIZE;
+              powerup.type = type;
+              powerup.textContent = type === 'speed' ? '⚡' : type === 'shield' ? '🛡️' : '✖️';
+      
+              gameArea.appendChild(powerup);
+              state.powerupsList.push(powerup);
+          }
+      }
+      
+      function isCollide(a, b) {
+          const aRect = a.getBoundingClientRect();
+          const bRect = b.getBoundingClientRect();
+          return !(
+              aRect.top > bRect.bottom ||
+              aRect.bottom < bRect.top ||
+              aRect.left > bRect.right ||
+              aRect.right < bRect.left
+          );
+      }
+      
+      function updateScore(points) {
+          let multiplier = 1;
+          if (state.powerups.multiplier.active) multiplier = state.powerups.multiplier.multiplier;
+      
+          state.score += points * multiplier;
+          scoreElement.textContent = state.score.toString();
+      
+          if (state.score > state.highScore) {
+              state.highScore = state.score;
+              localStorage.setItem('needForJSHighScore', state.highScore);
+              highScoreElement.textContent = state.highScore;
+          }
+      }
+      
+      function updateSpeed() {
+          let displaySpeed = state.powerups.speed.active ? (state.speed * state.powerups.speed.multiplier) : state.speed;
+          speedElement.textContent = displaySpeed.toFixed(1) + 'x';
+      }
+      
+      function updateCombo(multiplier) {
+          state.combo = multiplier;
+          comboElement.textContent = multiplier + 'x';
+          comboCount.textContent = multiplier + 'x';
+          
+          if (multiplier > 1) {
+              comboMeter.classList.add('active');
+              if (state.comboTimeout) clearTimeout(state.comboTimeout);
+              state.comboTimeout = setTimeout(() => {
+                  comboMeter.classList.remove('active');
+                  state.combo = 1;
+                  comboElement.textContent = '1x';
+              }, 2000);
+          } else {
+              comboMeter.classList.remove('active');
+          }
+      }
+      
+      function keyDown(e) {
+          if (e.key in keys) {
+              keys[e.key] = true;
+          }
+      
+          if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+              if (gameActive) {
+                  if (!gamePaused) {
+                      pauseGame();
+                  } else {
+                      resumeGame();
+                  }
+              }
+          }
+      }
+      
+      function keyUp(e) {
+          if (e.key in keys) {
+              keys[e.key] = false;
+          }
+      }
+      
+      function pauseGame() {
+          gamePaused = true;
+          pauseMenu.style.display = 'block';
+      }
+      
+      function resumeGame() {
+          if (!gameActive) return;
+          gamePaused = false;
+          pauseMenu.style.display = 'none';
+          requestAnimationFrame(gameLoop);
+      }
+      
+      function gameOver() {
+          gameActive = false;
+          gamePaused = false;
+          gameOverModal.style.display = 'block';
+          resultScore.textContent = state.score.toString();
+      
+          if (state.score > state.highScore) {
+              highScoreElement.textContent = state.score;
+          }
+      
+          clearGameEntities();
+      }
+      
+      function clearGameEntities() {
+          state.enemies.forEach(enemy => {
+              if (enemy.parentElement) enemy.parentElement.removeChild(enemy);
+          });
+          state.enemies.length = 0;
+      
+          state.powerupsList.forEach(powerup => {
+              if (powerup.parentElement) powerup.parentElement.removeChild(powerup);
+          });
+          state.powerupsList.length = 0;
+      
+          state.particles.forEach(particle => {
+              if (particle.parentElement) particle.parentElement.removeChild(particle);
+          });
+          state.particles.length = 0;
+      }
+      
+      function moveCar() {
+          const moveSpeed = 8;
+      
+          if (keys.ArrowLeft || keys.a) {
+              car.x -= moveSpeed;
+          }
+          if (keys.ArrowRight || keys.d) {
+              car.x += moveSpeed;
+          }
+          if (keys.ArrowUp || keys.w) {
+              car.y -= moveSpeed;
+          }
+          if (keys.ArrowDown || keys.s) {
+              car.y += moveSpeed;
+          }
+      
+          if (car.x < 0) car.x = 0;
+          if (car.x > ROAD_WIDTH - CAR_WIDTH) car.x = ROAD_WIDTH - CAR_WIDTH;
+          if (car.y < 0) car.y = 0;
+          if (car.y > gameArea.offsetHeight - CAR_HEIGHT - 50) {
+              car.y = gameArea.offsetHeight - CAR_HEIGHT - 50;
+          }
+      
+          car.style.left = car.x + 'px';
+          car.style.top = car.y + 'px';
+      }
+      
+      function gameLoop(timestamp) {
+          if (!gameActive || gamePaused) return;
+      
+          state.enemies.forEach(enemy => {
+              enemy.y += state.speed;
+              if (enemy.y > gameArea.offsetHeight) {
+                  enemy.y = -CAR_HEIGHT * state.traffic;
+                  enemy.style.left = Math.random() * (ROAD_WIDTH - CAR_WIDTH) + 'px';
+                  enemy.x = parseInt(enemy.style.left);
+              }
+              enemy.style.top = enemy.y + 'px';
+          });
+      
+          state.powerupsList.forEach((powerup, index) => {
+              powerup.y += state.speed;
+              if (powerup.y > gameArea.offsetHeight) {
+                  if (powerup.parentElement) powerup.parentElement.removeChild(powerup);
+                  state.powerupsList.splice(index, 1);
+              } else {
+                  powerup.style.top = powerup.y + 'px';
+              }
+          });
+      
+          createPowerup();
+      
+          moveCar();
+      
+          let collided = false;
+          for (let enemy of state.enemies) {
+              if (isCollide(car, enemy)) {
+                  if (state.powerups.shield.active) {
+                      deactivatePowerup('shield');
+                      enemy.y = -CAR_HEIGHT * state.traffic;
+                      enemy.style.left = Math.random() * (ROAD_WIDTH - CAR_WIDTH) + 'px';
+                      enemy.x = parseInt(enemy.style.left);
+                      continue;
+                  } else {
+                      collided = true;
+                      break;
+                  }
+              }
+          }
+          if (collided) {
+              gameOver();
+              return;
+          }
+      
+          state.powerupsList.forEach((powerup, index) => {
+              if (isCollide(car, powerup)) {
+                  activatePowerup(powerup.type);
+                  if (powerup.parentElement) powerup.parentElement.removeChild(powerup);
+                  state.powerupsList.splice(index, 1);
+              }
+          });
+      
+          updateScore(0.1 * state.speed * state.combo);
+      
+          updateSpeed();
+          updateCombo(state.combo);
+      
+          if (state.gameMode === 'time') {
+              state.timeTrial.time += 16;
+              if (state.timeTrial.time >= state.timeTrial.checkpointTime) {
+                  state.timeTrial.checkpoint++;
+                  state.timeTrial.time = 0;
+                  updateScore(1000);
+                  state.speed += 0.5;
+              }
+          }
+      
+          if (state.gameMode === 'survival' && state.score >= state.survival.nextLevelScore) {
+              state.survival.level++;
+              state.survival.nextLevelScore += 1000 * state.survival.level;
+              state.speed += 0.5;
+              createEnemy(-CAR_HEIGHT * state.traffic * (state.survival.level + 1));
+          }
+      
+          requestAnimationFrame(gameLoop);
+      }
+      
+      function activatePowerup(type) {
+          if (type === 'speed') {
+              state.powerups.speed.active = true;
+              clearTimeout(state.powerups.speed.timeout);
+              state.powerups.speed.timeout = setTimeout(() => {
+                  deactivatePowerup('speed');
+              }, 5000);
+          } else if (type === 'shield') {
+              state.powerups.shield.active = true;
+              clearTimeout(state.powerups.shield.timeout);
+              state.powerups.shield.timeout = setTimeout(() => {
+                  deactivatePowerup('shield');
+              }, 5000);
+          } else if (type === 'multiplier') {
+              state.powerups.multiplier.active = true;
+              clearTimeout(state.powerups.multiplier.timeout);
+              state.powerups.multiplier.timeout = setTimeout(() => {
+                  deactivatePowerup('multiplier');
+              }, 5000);
+          }
+      }
+      
+      function deactivatePowerup(type) {
+          if (type === 'speed') {
+              state.powerups.speed.active = false;
+          } else if (type === 'shield') {
+              state.powerups.shield.active = false;
+          } else if (type === 'multiplier') {
+              state.powerups.multiplier.active = false;
+          }
+      }
+      
+      function startGame() {
+          state.score = 0;
+          state.speed = state.baseSpeed;
+          state.traffic = 3;
+          state.combo = 1;
+          state.enemies = [];
+          state.powerupsList = [];
+          state.particles = [];
+          state.powerups.speed.active = false;
+          state.powerups.shield.active = false;
+          state.powerups.multiplier.active = false;
+      
+          if (state.gameMode === 'time') {
+              state.timeTrial.time = 0;
+              state.timeTrial.checkpoint = 0;
+          } else if (state.gameMode === 'survival') {
+              state.survival.level = 1;
+              state.survival.nextLevelScore = 1000;
+          }
+      
+          scoreElement.textContent = '0';
+          speedElement.textContent = '1x';
+          comboElement.textContent = '1x';
+          comboMeter.classList.remove('active');
+      
+          clearGameArea();
+      
+          gameArea.appendChild(road);
+          gameArea.appendChild(car);
+      
+          car.style.left = (ROAD_WIDTH / 2 - CAR_WIDTH / 2) + 'px';
+          car.style.top = (gameArea.offsetHeight - CAR_HEIGHT - 50) + 'px';
+          car.x = ROAD_WIDTH / 2 - CAR_WIDTH / 2;
+          car.y = gameArea.offsetHeight - CAR_HEIGHT - 50;
+      
+          createRoadLines();
+          createInitialEnemies();
+      
+          mainMenu.style.display = 'none';
+          gameOverModal.style.display = 'none';
+          pauseMenu.style.display = 'none';
+      
+          gameActive = true;
+          gamePaused = false;
+      
+          requestAnimationFrame(gameLoop);
+      }
+      
+      init();
+  </script>
+  </body>
+</html>
